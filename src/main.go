@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+var storage []string
+
 func main() {
 
 	introInformation()
@@ -45,26 +47,48 @@ func console() {
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
-		fmt.Print("-> ")
-		text, _ := reader.ReadString('\n')
+		fmt.Print("> ")
+		command, _ := reader.ReadString('\n')
 		// convert CRLF to LF
-		text = strings.Replace(text, "\n", "", -1)
-		operations(text)
+		command = strings.Replace(command, "\n", "", -1)
+		handleCommand(command)
 	}
 }
 
-func operations(text string) {
-	if strings.Compare("hi", text) == 0 {
-		fmt.Println("hello, Yourself")
-	}
-
-	if strings.Compare("exit", text) == 0 {
+func handleCommand(command string) {
+	switch command {
+	case "show data":
+		showData()
+	case "storage status":
+		fmt.Println("Records - 12031")
+		fmt.Println("Size: - 2.3 Mb")
+	case "exit":
 		os.Exit(0)
+	default:
+		handleCompoundCommand(command)
+	}
+}
+
+func handleCompoundCommand(command string) {
+	// type consoleCommand struct {
+	// 	name string
+	// 	id   int
+	// }
+
+	if strings.Contains(command, "insert data") {
+		var length = len([]rune(command))
+		var lengthSub = len([]rune("insert data"))
+		data := command[lengthSub+1 : length]
+		storage = append(storage, data)
+		fmt.Println("Data saved.")
+	} else {
+		fmt.Println("Unknown command!")
 	}
 
-	if strings.Compare("show data", text) == 0 {
-		fmt.Println("1. Yuriy")
-		fmt.Println("2. Koly")
-		fmt.Println("1. Ivan")
+}
+
+func showData() {
+	for _, value := range storage {
+		fmt.Println(value)
 	}
 }
