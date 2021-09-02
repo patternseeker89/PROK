@@ -10,6 +10,7 @@ import (
 var storage []string
 
 func main() {
+	loadStorageFromFile()
 
 	introInformation()
 	console()
@@ -49,7 +50,6 @@ func console() {
 	for {
 		fmt.Print("> ")
 		command, _ := reader.ReadString('\n')
-		// convert CRLF to LF
 		command = strings.Replace(command, "\n", "", -1)
 		handleCommand(command)
 	}
@@ -57,12 +57,15 @@ func console() {
 
 func handleCommand(command string) {
 	switch command {
+	case "help":
+		help()
 	case "show data":
 		showData()
 	case "storage status":
 		fmt.Println("Records - 12031")
 		fmt.Println("Size: - 2.3 Mb")
 	case "exit":
+		saveStorageInFile()
 		os.Exit(0)
 	default:
 		handleCompoundCommand(command)
@@ -90,5 +93,45 @@ func handleCompoundCommand(command string) {
 func showData() {
 	for _, value := range storage {
 		fmt.Println(value)
+	}
+}
+
+func help() {
+	fmt.Println("Help information of commands:")
+	fmt.Println("1. exit")
+	fmt.Println("2. storage status")
+	fmt.Println("3. insert data {{data}}")
+	fmt.Println("4. show data")
+}
+
+func saveStorageInFile() {
+
+	file, err := os.Create("data.txt")
+
+	if err != nil {
+		//log.Fatal(err)
+	}
+
+	defer file.Close()
+
+	for _, value := range storage {
+		_, err2 := file.WriteString(value + "\n")
+
+		if err2 != nil {
+			//log.Fatal(err2)
+		}
+	}
+}
+
+func loadStorageFromFile() {
+	file, err := os.Open("data.txt")
+	if err != nil {
+		//return nil, err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		storage = append(storage, scanner.Text())
 	}
 }
