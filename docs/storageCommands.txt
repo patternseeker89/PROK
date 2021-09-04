@@ -1,0 +1,28 @@
+1. add node [parent node hash] [name] [data]
+Example:
+    add node 0a4ec9d8dce6bbf33a2 "Deposits in USD" "Data example string"
+
+------------------------------
+
+2. show node [node hash]
+Example:
+    show node 0a4ec9d8dce6bbf33a2
+
+Result in console:
+name: Deposits in USD
+data: Data example string
+size: 2 Kb
+
+------------------------------
+
+3. show subtree [node hash]
+Example:
+    show subtree 0a4ec9d8dce6bbf33a2
+
+Result in console:
+└── "Deposits in USD"[0a4ec9d8dce6bbf33a2]
+    ├── "Deposit 1 from 2020"[564ec9d8dce6bbf33a2]
+    ├── "Small deposit for car"[9r4ec9d8dce6bbf33a2]
+    │   ├── "Documents"[4t4ec9d8dce6bbf33a2]
+    │   │   └── "Deposit agreement"[3gy5ec9d8dce6bbf33a2]
+    └── "Main deposit in National bank"[7y3ec9d8dce6bbf33a2]
