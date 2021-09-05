@@ -15,7 +15,18 @@ size: 2 Kb
 
 ------------------------------
 
-3. show subtree [node hash]
+3. update node [node hash] [new name] [new data(required)]
+Example:
+    show node 0a4ec9d8dce6bbf33a2 "Deposits in USD beetwen 2020 and 2022 years" "In this place saved list of deposits in USD for 2 years period"
+
+Result in console:
+name: Deposits in USD beetwen 2020 and 2022 years
+data: In this place saved list of deposits in USD for 2 years period
+size: 5 Kb
+
+------------------------------
+
+4. show subtree [node hash]
 Example:
     show subtree 0a4ec9d8dce6bbf33a2
 
