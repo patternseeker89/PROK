@@ -67,6 +67,10 @@ Example:
     storage history log size: 50 Kb
     max node: 0a4ec9d8dce6bbf33a2
     max node size: 10 Kb
-    
+
 ------------------------------
 
+8. help
+This command output help information in console
+
+------------------------------

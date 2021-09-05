@@ -10,6 +10,14 @@ import (
 var storage []string
 
 func main() {
+	var number int = 5
+	var p *int
+	p = &number
+
+	fmt.Println(*p)
+	*p = 34
+	fmt.Println(*p)
+
 	loadStorageFromFile()
 
 	introInformation()
