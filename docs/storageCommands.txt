@@ -47,3 +47,13 @@ Result in console:
     │   ├── "Documents"[4t4ec9d8dce6bbf33a2]
     │   │   └── "Deposit agreement"[3gy5ec9d8dce6bbf33a2]
     └── "Main deposit in National bank"[7y3ec9d8dce6bbf33a2]
+
+------------------------------
+
+6. show storage
+This command output all data tree in console
+
+------------------------------
+
+7. show storage statistics
+This command output size, count adn others param of storage in console
