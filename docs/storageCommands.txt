@@ -1,10 +1,10 @@
-1. add node [parent node hash] [name] [data]
+1. add node [parent node hash] [name] [data(required)]
 Example:
     add node 0a4ec9d8dce6bbf33a2 "Deposits in USD" "Data example string"
 
 ------------------------------
 
-2. show node [node hash]
+2. show node [node hash(required)]
 Example:
     show node 0a4ec9d8dce6bbf33a2
 
@@ -15,7 +15,7 @@ size: 2 Kb
 
 ------------------------------
 
-3. update node [node hash] [new name] [new data(required)]
+3. update node [node hash(required)] [new name] [new data(required)]
 Example:
     show node 0a4ec9d8dce6bbf33a2 "Deposits in USD beetwen 2020 and 2022 years" "In this place saved list of deposits in USD for 2 years period"
 
@@ -26,7 +26,17 @@ size: 5 Kb
 
 ------------------------------
 
-4. show subtree [node hash]
+4. delete node [node hash(required)] --[with subtree]
+Example:
+    single node:
+    delete nodee 0a4ec9d8dce6bbf33a2
+
+    node and subtree:
+    delete nodee 0a4ec9d8dce6bbf33a2 --subtree
+
+------------------------------
+
+5. show subtree [node hash(required)]
 Example:
     show subtree 0a4ec9d8dce6bbf33a2
 
