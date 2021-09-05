@@ -3,6 +3,7 @@ package main
 import "fmt"
 
 type bigNode struct {
+	key    string
 	value  string
 	childs []*bigNode
 }
@@ -48,7 +49,7 @@ func main() {
 	fmt.Println()
 	printNodesTree(&node1)
 
-	fmt.Println(findNodeInTree("Text 43", &node1))
+	fmt.Println(findNodeInTree("Text 4", &node1))
 }
 
 func printNodesTree(node *bigNode) {
@@ -81,4 +82,16 @@ func findNodeInTree(value string, node *bigNode) *bigNode {
 	}
 
 	return neededNode
+}
+
+func addNode(parentKey string, name, data string) {
+
+}
+
+func deleteNode(key string, depth int) {
+
+}
+
+func updateNode(key string, name, data string) {
+
 }
