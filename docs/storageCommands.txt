@@ -50,10 +50,23 @@ Result in console:
 
 ------------------------------
 
-6. show storage
+6. show storage --[depth(in levels)]
 This command output all data tree in console
 
 ------------------------------
 
 7. show storage statistics
 This command output size, count adn others param of storage in console
+
+Example:
+    created date: 2021-10-23
+    size: 120 Kb
+    count of nodes: 123
+    depth: 10 levels
+    operations with storage: 203
+    storage history log size: 50 Kb
+    max node: 0a4ec9d8dce6bbf33a2
+    max node size: 10 Kb
+    
+------------------------------
+
