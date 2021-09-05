@@ -8,6 +8,12 @@ type bigNode struct {
 	childs []*bigNode
 }
 
+type storage struct {
+	tree       bigNode
+	size       int
+	nodesCount int
+}
+
 func main() {
 	type node struct {
 		value int
