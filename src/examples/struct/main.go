@@ -5,6 +5,8 @@ import "fmt"
 type bigNode struct {
 	key    string
 	value  string
+	name   string
+	data   string
 	childs []*bigNode
 }
 
@@ -13,6 +15,8 @@ type storage struct {
 	size       int
 	nodesCount int
 }
+
+var node1 bigNode = bigNode{value: "Text 1"}
 
 func main() {
 	type node struct {
@@ -38,10 +42,10 @@ func main() {
 
 	//--------------------
 
-	node1 := bigNode{value: "Text 1"}
+	//node1 := bigNode{value: "Text 1"}
 	node2 := bigNode{value: "Text 2"}
 	node3 := bigNode{value: "Text 3"}
-	node4 := bigNode{value: "Text 4"}
+	node4 := bigNode{value: "Text 4", key: "0a4ec9d8dce6bbf33a2"}
 
 	node1.childs = []*bigNode{&node2, &node3}
 	node2.childs = []*bigNode{&node4}
@@ -55,7 +59,12 @@ func main() {
 	fmt.Println()
 	printNodesTree(&node1)
 
-	fmt.Println(findNodeInTree("Text 4", &node1))
+	fmt.Println(findNodeInTree("Text 4", &node1).key)
+
+	addNode("Text 3", "Name 11", "Data 22")
+	addNode("Text 1", "Name root", "Data root")
+
+	printNodesTree(&node1)
 }
 
 func printNodesTree(node *bigNode) {
@@ -91,7 +100,9 @@ func findNodeInTree(value string, node *bigNode) *bigNode {
 }
 
 func addNode(parentKey string, name, data string) {
-
+	parentNode := findNodeInTree(parentKey, &node1)
+	newNode := bigNode{value: data, name: name, data: data}
+	parentNode.childs = append(parentNode.childs, &newNode)
 }
 
 func deleteNode(key string, depth int) {
