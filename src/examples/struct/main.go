@@ -1,10 +1,13 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand"
+	"strconv"
+)
 
 type bigNode struct {
 	key    string
-	value  string
 	name   string
 	data   string
 	childs []*bigNode
@@ -16,75 +19,34 @@ type storage struct {
 	nodesCount int
 }
 
-var node1 bigNode = bigNode{value: "Text 1"}
+var node bigNode = bigNode{
+	key:  "jj38",
+	name: "root",
+	data: "Using Join() function: This function concatenates all the elements present in the slice of string into a single string. This function is available in string package.",
+}
 
 func main() {
-	type node struct {
-		value int
-		next  *node
-	}
+	fmt.Println(findNodeInTree("jj38", &node).key)
 
-	first := node{value: 4}
-	second := node{value: 5}
-	third := node{value: 6}
-	four := node{value: 30}
+	addNode("jj38", "Banks", "List of all my banks")
+	addNode("8498081", "Privatbank", "very big")
+	addNode("8498081", "PUMB", "Sister work")
+	addNode("9727887", "Deposits", "List of my deposits")
+	addNode("9727887", "Accounts", "List of my accounts")
+	addNode("1902081", "FOP cabinet", "---")
 
-	first.next = &second
-	second.next = &third
-	third.next = &four
-
-	var current *node = &first
-	for current != nil {
-		fmt.Print(current.value, " -> ")
-		current = current.next
-	}
-	fmt.Print("nil ")
-
-	//--------------------
-
-	//node1 := bigNode{value: "Text 1"}
-	node2 := bigNode{value: "Text 2"}
-	node3 := bigNode{value: "Text 3"}
-	node4 := bigNode{value: "Text 4", key: "0a4ec9d8dce6bbf33a2"}
-
-	node1.childs = []*bigNode{&node2, &node3}
-	node2.childs = []*bigNode{&node4}
-
-	// var currentBigNode *bigNode = &node1
-	// for currentBigNode != nil {
-	// 	fmt.Print(currentBigNode.value, " -> ")
-	// 	//currentBigNode = currentBigNode.childs[1]
-	// }
+	fmt.Println("----------------------------")
 	fmt.Println()
-	fmt.Println()
-	printNodesTree(&node1)
-
-	fmt.Println(findNodeInTree("Text 4", &node1).key)
-
-	addNode("Text 3", "Name 11", "Data 22")
-	addNode("Text 1", "Name root", "Data root")
-
-	printNodesTree(&node1)
+	print()
 }
 
-func printNodesTree(node *bigNode) {
-	fmt.Println(node.value)
-
-	if node.childs != nil {
-		for _, childNode := range node.childs {
-			printNodesTree(childNode)
-		}
-		fmt.Println()
-	}
-}
-
-func findNodeInTree(value string, node *bigNode) *bigNode {
+func findNodeInTree(key string, node *bigNode) *bigNode {
 	var neededNode *bigNode
 
-	if node.value != value {
+	if node.key != key {
 		if node.childs != nil {
 			for _, childNode := range node.childs {
-				neededNode = findNodeInTree(value, childNode)
+				neededNode = findNodeInTree(key, childNode)
 				if neededNode != nil {
 					break
 				}
@@ -100,9 +62,13 @@ func findNodeInTree(value string, node *bigNode) *bigNode {
 }
 
 func addNode(parentKey string, name, data string) {
-	parentNode := findNodeInTree(parentKey, &node1)
-	newNode := bigNode{value: data, name: name, data: data}
+	var parentNode *bigNode = findNodeInTree(parentKey, &node)
+	newNode := bigNode{key: strconv.FormatInt(int64(generateNodekey()), 10), name: name, data: data}
 	parentNode.childs = append(parentNode.childs, &newNode)
+}
+
+func generateNodekey() int {
+	return rand.Intn(10000000)
 }
 
 func deleteNode(key string, depth int) {
@@ -111,4 +77,28 @@ func deleteNode(key string, depth int) {
 
 func updateNode(key string, name, data string) {
 
+}
+
+func print() {
+	fmt.Println(".")
+	fmt.Println("|")
+	printTree(&node, "|")
+}
+
+func printTree(node *bigNode, separator string) string {
+	separator = separator + "----"
+	fmt.Println(separator, "#"+node.key+" "+node.name)
+	if node.childs != nil {
+		for _, childNode := range node.childs {
+			if childNode.childs != nil {
+				printTree(childNode, separator)
+			} else {
+				separator = separator + "----"
+				fmt.Println(separator, "#"+childNode.key+" "+childNode.name)
+				separator = separator[0 : len(separator)-4]
+			}
+		}
+	}
+
+	return separator
 }
