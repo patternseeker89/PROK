@@ -23,6 +23,13 @@ type storage struct {
 	nodesCount int
 }
 
+type serializedNode struct {
+	parentKey string
+	key       string
+	name      string
+	data      string
+}
+
 var rootNode node = node{key: "root", name: "Storage", data: "Root node in storage"}
 
 var storage1 []string
@@ -152,6 +159,11 @@ func handleCompoundCommand(command string) {
 		params := strings.Split(data, " ")
 		fmt.Println(params)
 		addNode(params[0], params[1], params[2])
+	} else if strings.Contains(command, "show node") {
+		var length = len([]rune(command))
+		var lengthSub = len([]rune("find node"))
+		key := command[lengthSub+1 : length]
+		showNode(key)
 	} else if strings.Contains(command, "show storage") {
 		print()
 	} else {
@@ -163,12 +175,13 @@ func help() {
 	fmt.Println("Help information of commands:")
 	fmt.Println("1. show shorage")
 	fmt.Println("2. storage status")
-	fmt.Println("3. insert node {{parentKey}} {{name}} {{data}}")
-	fmt.Println("3. find node {{parentKey}}")
-	fmt.Println("4. delete node {{key}}")
-	fmt.Println("5. update node {{key}} {{name}} {{data}}")
-	fmt.Println("6. move node {{key}} {{newParentKey}}")
-	fmt.Println("7. exit")
+	fmt.Println("3. show node {{key}}")
+	fmt.Println("4. insert node {{parentKey}} {{name}} {{data}}")
+	fmt.Println("5. find node {{parentKey}}")
+	fmt.Println("6. delete node {{key}}")
+	fmt.Println("7. update node {{key}} {{name}} {{data}}")
+	fmt.Println("8. move node {{key}} {{newParentKey}}")
+	fmt.Println("9. exit")
 }
 
 /**
@@ -216,6 +229,16 @@ func updateNode(key string, name, data string) {
 	neededNode.data = data
 }
 
+func showNode(key string) {
+	var node = findNodeInTree(key, &rootNode)
+	fmt.Println("key: " + node.key)
+	fmt.Println("name: " + node.name)
+	fmt.Println("data: " + node.data)
+	fmt.Print("childs: ")
+	fmt.Print(len(node.childs))
+	fmt.Println()
+}
+
 func print() {
 	fmt.Println(".")
 	fmt.Println("|")
@@ -255,10 +278,16 @@ func saveStorageIntoFile() {
 	var data = serializeStorage()
 	fmt.Println(data)
 
-	err = binary.Write(file, binary.LittleEndian, data)
-	if err != nil {
-		fmt.Println("Save storage file failed!")
-	}
+	// n2, err := file.Write(data)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+
+	// err = binary.Write(file, binary.LittleEndian, data)
+	// if err != nil {
+	// 	fmt.Println("Save storage file failed!")
+	// 	fmt.Println(err)
+	// }
 }
 
 func loadStorageFromFile() {
@@ -279,19 +308,34 @@ func loadStorageFromFile() {
 	fmt.Println(data1)
 }
 
-func serializeStorage() []node {
-	return serializeTree(&rootNode)
+func serializeStorage() []serializedNode {
+	return serializeTree(&rootNode, "")
 }
 
-func serializeTree(currentNode *node) []node {
-	var serializedData []node
+func serializeTree(currentNode *node, parentKey string) []serializedNode {
+	var serializedData []serializedNode
 
-	serializedData = append(serializedData, *currentNode)
+	fmt.Println("parentKey: " + parentKey)
+
+	var currentSerializedNode = serializedNode{
+		parentKey: parentKey,
+		key:       currentNode.key,
+		name:      currentNode.name,
+		data:      currentNode.data}
+	serializedData = append(serializedData, currentSerializedNode)
+
 	if currentNode.childs != nil {
 		for _, childNode := range currentNode.childs {
-			serializedData = append(serializedData, *currentNode)
+
+			currentSerializedNode := serializedNode{
+				parentKey: currentNode.key,
+				key:       childNode.key,
+				name:      childNode.name,
+				data:      childNode.data}
+			serializedData = append(serializedData, currentSerializedNode)
 			if childNode.childs != nil {
-				serializeTree(childNode)
+				fmt.Println("222")
+				serializedData = append(serializedData, serializeTree(childNode.childs[0], childNode.key)...)
 			}
 		}
 	}
