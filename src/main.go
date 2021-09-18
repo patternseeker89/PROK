@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/binary"
 	"fmt"
 	"math/rand"
 	"os"
@@ -22,24 +23,12 @@ type storage struct {
 	nodesCount int
 }
 
-var rootNode node = node{key: "2"}
+var rootNode node = node{key: "root", name: "Storage", data: "Root node in storage"}
 
 var storage1 []string
 
 func main() {
-
-	//storage.Test()
-
-	var number int = 5
-	var p *int
-	p = &number
-
-	fmt.Println(*p)
-	*p = 34
-	fmt.Println(*p)
-
 	loadStorageFromFile()
-
 	introInformation()
 	console()
 
@@ -63,6 +52,44 @@ func main() {
 	// fmt.Println(string(colorWhite), "test")
 	// fmt.Println(string(colorCyan), "test", string(colorReset))
 
+}
+
+func saveStorageInFile1() {
+
+	file, err := os.Create("data.txt")
+
+	if err != nil {
+		//log.Fatal(err)
+	}
+
+	defer file.Close()
+
+	for _, value := range storage1 {
+		_, err2 := file.WriteString(value + "\n")
+
+		if err2 != nil {
+			//log.Fatal(err2)
+		}
+	}
+}
+
+func loadStorageFromFile1() {
+	file, err := os.Open("data.txt")
+	if err != nil {
+		//return nil, err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		storage1 = append(storage1, scanner.Text())
+	}
+}
+
+func showData() {
+	for _, value := range storage1 {
+		fmt.Println(value)
+	}
 }
 
 /**
@@ -97,7 +124,7 @@ func handleCommand(command string) {
 		fmt.Println("Records - 12031")
 		fmt.Println("Size: - 2.3 Mb")
 	case "exit":
-		saveStorageInFile()
+		saveStorageIntoFile()
 		os.Exit(0)
 	default:
 		handleCompoundCommand(command)
@@ -105,11 +132,6 @@ func handleCommand(command string) {
 }
 
 func handleCompoundCommand(command string) {
-	// type consoleCommand struct {
-	// 	name string
-	// 	id   int
-	// }
-
 	if strings.Contains(command, "insert data") {
 		var length = len([]rune(command))
 		var lengthSub = len([]rune("insert data"))
@@ -135,53 +157,18 @@ func handleCompoundCommand(command string) {
 	} else {
 		fmt.Println("Unknown command!")
 	}
-
-}
-
-func showData() {
-	for _, value := range storage1 {
-		fmt.Println(value)
-	}
 }
 
 func help() {
 	fmt.Println("Help information of commands:")
-	fmt.Println("1. exit")
+	fmt.Println("1. show shorage")
 	fmt.Println("2. storage status")
-	fmt.Println("3. insert data {{data}}")
-	fmt.Println("4. show data")
-}
-
-func saveStorageInFile() {
-
-	file, err := os.Create("data.txt")
-
-	if err != nil {
-		//log.Fatal(err)
-	}
-
-	defer file.Close()
-
-	for _, value := range storage1 {
-		_, err2 := file.WriteString(value + "\n")
-
-		if err2 != nil {
-			//log.Fatal(err2)
-		}
-	}
-}
-
-func loadStorageFromFile() {
-	file, err := os.Open("data.txt")
-	if err != nil {
-		//return nil, err
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		storage1 = append(storage1, scanner.Text())
-	}
+	fmt.Println("3. insert node {{parentKey}} {{name}} {{data}}")
+	fmt.Println("3. find node {{parentKey}}")
+	fmt.Println("4. delete node {{key}}")
+	fmt.Println("5. update node {{key}} {{name}} {{data}}")
+	fmt.Println("6. move node {{key}} {{newParentKey}}")
+	fmt.Println("7. exit")
 }
 
 /**
@@ -220,11 +207,13 @@ func generateNodekey() int {
 }
 
 func deleteNode(key string, depth int) {
-
+	//var neededNode = findNodeInTree(key, &rootNode)
 }
 
 func updateNode(key string, name, data string) {
-
+	var neededNode = findNodeInTree(key, &rootNode)
+	neededNode.name = name
+	neededNode.data = data
 }
 
 func print() {
@@ -249,4 +238,66 @@ func printTree(node *node, separator string) string {
 	}
 
 	return separator
+}
+
+type data struct {
+	str1 int32
+	str2 int32
+}
+
+func saveStorageIntoFile() {
+	file, err := os.Create("storage.dat")
+	if err != nil {
+		fmt.Println("Couldn't open storage file!")
+	}
+	defer file.Close()
+
+	var data = serializeStorage()
+	fmt.Println(data)
+
+	err = binary.Write(file, binary.LittleEndian, data)
+	if err != nil {
+		fmt.Println("Save storage file failed!")
+	}
+}
+
+func loadStorageFromFile() {
+	file, err := os.Open("storage.dat")
+	if err != nil {
+		fmt.Println("Couldn't open storage file!")
+	}
+
+	defer file.Close()
+
+	var data1 = data{}
+
+	binary.Read(file, binary.LittleEndian, &data1.str1)
+	binary.Read(file, binary.LittleEndian, &data1.str2)
+	// binary.Read(file, binary.LittleEndian, &rootNode.data)
+	// binary.Read(file, binary.LittleEndian, &rootNode.childs)
+
+	fmt.Println(data1)
+}
+
+func serializeStorage() []node {
+	return serializeTree(&rootNode)
+}
+
+func serializeTree(currentNode *node) []node {
+	var serializedData []node
+
+	serializedData = append(serializedData, *currentNode)
+	if currentNode.childs != nil {
+		for _, childNode := range currentNode.childs {
+			serializedData = append(serializedData, *currentNode)
+			if childNode.childs != nil {
+				serializeTree(childNode)
+			}
+		}
+	}
+
+	// var node = node{key: "root", name: "Storage", data: "Root node in storage"}
+	// serializedData = append(serializedData, node)
+
+	return serializedData
 }
