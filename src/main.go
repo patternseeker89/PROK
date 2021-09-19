@@ -34,71 +34,48 @@ type serializedNode struct {
 
 var rootNode node = node{key: "root", name: "Storage", data: "Root node in storage"}
 
-var storage1 []string
+type colors struct {
+	red    string
+	green  string
+	yellow string
+	blue   string
+	reset  string
+}
+
+var consoleColors colors = colors{red: "\033[31m", green: "\033[32m", yellow: "\033[33m", blue: "\033[34m", reset: "\033[0m"}
+
+type consoleCommands struct {
+	insertData    string
+	findNode      string
+	addNode       string
+	showNode      string
+	showStorage   string
+	help          string
+	storageStatus string
+	exit          string
+}
+
+var consoleCommandList consoleCommands = consoleCommands{
+	findNode:      "find node",
+	addNode:       "add node",
+	showNode:      "show node",
+	showStorage:   "show storage",
+	help:          "help",
+	storageStatus: "storage status",
+	exit:          "exit",
+}
 
 func main() {
 	loadStorageFromFile()
 	introInformation()
 	console()
 
-	// fmt.Println("Hello, world!")
-
-	// colorReset := "\033[0m"
-
-	// colorRed := "\033[31m"
-	// colorGreen := "\033[32m"
-	// colorYellow := "\033[33m"
-	// colorBlue := "\033[34m"
 	// colorPurple := "\033[35m"
 	// colorCyan := "\033[36m"
 	// colorWhite := "\033[37m"
-
-	// fmt.Println(string(colorRed), "test")
-	// fmt.Println(string(colorGreen), "test")
-	// fmt.Println(string(colorYellow), "test")
-	// fmt.Println(string(colorBlue), "test")
-	// fmt.Println(string(colorPurple), "test")
 	// fmt.Println(string(colorWhite), "test")
 	// fmt.Println(string(colorCyan), "test", string(colorReset))
 
-}
-
-func saveStorageInFile1() {
-
-	file, err := os.Create("data.txt")
-
-	if err != nil {
-		//log.Fatal(err)
-	}
-
-	defer file.Close()
-
-	for _, value := range storage1 {
-		_, err2 := file.WriteString(value + "\n")
-
-		if err2 != nil {
-			//log.Fatal(err2)
-		}
-	}
-}
-
-func loadStorageFromFile1() {
-	file, err := os.Open("data.txt")
-	if err != nil {
-		//return nil, err
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		storage1 = append(storage1, scanner.Text())
-	}
-}
-
-func showData() {
-	for _, value := range storage1 {
-		fmt.Println(value)
-	}
 }
 
 /**
@@ -106,10 +83,8 @@ func showData() {
  **/
 
 func introInformation() {
-	colorReset := "\033[0m"
-	colorGreen := "\033[32m"
-	fmt.Println(string(colorGreen), "PROK 2021 email: porfirovskiy@gmail.com", string(colorReset))
-	fmt.Println("---------------------")
+	fmt.Println(string(consoleColors.blue), "PROK 2021 email: porfirovskiy@gmail.com", string(consoleColors.reset))
+	fmt.Println()
 }
 
 func console() {
@@ -125,52 +100,94 @@ func console() {
 
 func handleCommand(command string) {
 	switch command {
-	case "help":
+	case consoleCommandList.help:
 		help()
-	case "show data":
-		showData()
-	case "storage status":
+	case consoleCommandList.storageStatus:
 		fmt.Println("Records - 12031")
 		fmt.Println("Size: - 2.3 Mb")
-	case "exit":
+	case consoleCommandList.exit:
 		saveStorageIntoFile()
 		os.Exit(0)
 	default:
-		handleCompoundCommand(command)
+		handleCommandWithParams(command)
 	}
 }
 
-func handleCompoundCommand(command string) {
-	if strings.Contains(command, "insert data") {
-		var length = len([]rune(command))
-		var lengthSub = len([]rune("insert data"))
-		data := command[lengthSub+1 : length]
-		storage1 = append(storage1, data)
-		fmt.Println("Data saved.")
-	} else if strings.Contains(command, "find node") {
-		var length = len([]rune(command))
-		var lengthSub = len([]rune("find node"))
-		key := command[lengthSub+1 : length]
-		fmt.Println(key)
-		fmt.Println(findNodeInTree(key, &rootNode).key)
-	} else if strings.Contains(command, "add node") {
-		var length = len([]rune(command))
-		var lengthSub = len([]rune("add node"))
-		data := command[lengthSub+1 : length]
-		fmt.Println(data)
-		params := strings.Split(data, " ")
-		fmt.Println(params)
-		addNode(params[0], params[1], params[2])
-	} else if strings.Contains(command, "show node") {
-		var length = len([]rune(command))
-		var lengthSub = len([]rune("find node"))
-		key := command[lengthSub+1 : length]
-		showNode(key)
-	} else if strings.Contains(command, "show storage") {
+func handleCommandWithParams(command string) {
+	if strings.Contains(command, consoleCommandList.findNode) {
+		handleConsoleCommandFindNode(command)
+	} else if strings.Contains(command, consoleCommandList.addNode) {
+		handleConsoleCommandAddNode(command)
+	} else if strings.Contains(command, consoleCommandList.showNode) {
+		handleConsoleCommandShowNode(command)
+	} else if strings.Contains(command, consoleCommandList.showStorage) {
 		print()
 	} else {
 		fmt.Println("Unknown command!")
 	}
+}
+
+func handleConsoleCommandFindNode(command string) {
+	params := getParamsFromCommand(command, consoleCommandList.findNode)
+
+	if len(params) > 0 {
+		key := params[0]
+		node := findNodeInTree(key, &rootNode)
+		if node != nil {
+			fmt.Println()
+			showSuccessMessage("Node found:")
+			fmt.Println("key: ", node.key)
+			fmt.Println("name: ", node.name)
+			fmt.Println()
+		} else {
+			showErrorMessage("Node not found!")
+		}
+	} else {
+		showErrorMessage("Empty node key!")
+	}
+}
+
+func handleConsoleCommandAddNode(command string) {
+	params := getParamsFromCommand(command, consoleCommandList.addNode)
+
+	if len(params) > 2 {
+		addNode(params[0], params[1], params[2])
+		showSuccessMessage("Node added")
+	} else {
+		fmt.Println(string(consoleColors.red), "Wrong node params!", string(consoleColors.reset))
+	}
+}
+
+func handleConsoleCommandShowNode(command string) {
+	params := getParamsFromCommand(command, consoleCommandList.showNode)
+
+	if len(params) > 0 {
+		key := params[0]
+		showNode(key)
+	} else {
+		fmt.Println(string(consoleColors.red), "Empty node key!", string(consoleColors.reset))
+	}
+}
+
+func getParamsFromCommand(command string, commandName string) []string {
+	var length = len([]rune(command))
+	var lengthSub = len([]rune(commandName))
+
+	var params []string
+	if length > lengthSub {
+		data := command[lengthSub+1 : length]
+		params = strings.Split(data, " ")
+	}
+
+	return params
+}
+
+func showErrorMessage(message string) {
+	fmt.Println(string(consoleColors.red), message, string(consoleColors.reset))
+}
+
+func showSuccessMessage(message string) {
+	fmt.Println(string(consoleColors.green), message, string(consoleColors.reset))
 }
 
 func help() {
@@ -233,12 +250,18 @@ func updateNode(key string, name, data string) {
 
 func showNode(key string) {
 	var node = findNodeInTree(key, &rootNode)
-	fmt.Println("key: " + node.key)
-	fmt.Println("name: " + node.name)
-	fmt.Println("data: " + node.data)
-	fmt.Print("childs: ")
-	fmt.Print(len(node.childs))
-	fmt.Println()
+	if node != nil {
+		fmt.Println()
+		fmt.Println("key: " + node.key)
+		fmt.Println("name: " + node.name)
+		fmt.Println("data: " + node.data)
+		fmt.Print("childs: ")
+		fmt.Print(len(node.childs))
+		fmt.Println()
+		fmt.Println()
+	} else {
+		fmt.Println(string(consoleColors.red), "Node does not exist for this key!", string(consoleColors.reset))
+	}
 }
 
 func print() {
