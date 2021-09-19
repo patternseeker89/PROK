@@ -2,10 +2,9 @@ package main
 
 import (
 	"bufio"
-	"encoding/binary"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"math/rand"
 	"os"
 	"strconv"
@@ -26,10 +25,10 @@ type storage struct {
 }
 
 type serializedNode struct {
-	parentKey string
-	key       string
-	name      string
-	data      string
+	ParentKey string
+	Key       string
+	Name      string
+	Data      string
 }
 
 var rootNode node = node{key: "root", name: "Storage", data: "Root node in storage"}
@@ -303,43 +302,20 @@ func saveStorageIntoFile() {
 	var data = serializeStorage()
 	fmt.Println("data: ")
 	fmt.Println(data)
-	// var unData = unserializeStorage(data)
-	// fmt.Println(unData)
-	// printTree(&unData, "|")
+	fmt.Println(data[0])
 
-	var map1 = make(map[string]serializedNode)
-	mapp := serializedNode{key: "test"}
-	map1["root"] = mapp
-
-	var dataBytes []byte
-	dataBytes, err = json.Marshal(map1)
+	jsonData, err := json.Marshal(data)
 	if err != nil {
-		fmt.Println("11111!")
+		fmt.Println("error:", err)
+	}
+	os.Stdout.Write(jsonData)
+
+	result, err := file.Write(jsonData)
+	if err != nil {
+		fmt.Println("error:", err)
 	}
 
-	fmt.Println("dataBytes: ")
-	fmt.Println(dataBytes)
-
-	err = ioutil.WriteFile("storage.dat", dataBytes, 0777)
-	if err != nil {
-		fmt.Println("22222!")
-	}
-
-	// _, err = file.WriteString(fmt.Sprintln(data))
-	// if err != nil {
-	// 	fmt.Println("Couldn't open storage file!")
-	// }
-
-	// n2, err := file.Write(data)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-
-	// err = binary.Write(file, binary.LittleEndian, data)
-	// if err != nil {
-	// 	fmt.Println("Save storage file failed!")
-	// 	fmt.Println(err)
-	// }
+	fmt.Println(result)
 }
 
 func loadStorageFromFile() {
@@ -350,19 +326,21 @@ func loadStorageFromFile() {
 
 	defer file.Close()
 
-	var data1 = data{}
+	data := make([]byte, 64)
+	for {
+		numberOfBytes, err := file.Read(data)
+		if err == io.EOF {
+			break
+		}
+		fmt.Print("data: ", string(data[:numberOfBytes]))
+	}
 
-	binary.Read(file, binary.LittleEndian, &data1.str1)
-	binary.Read(file, binary.LittleEndian, &data1.str2)
-	// binary.Read(file, binary.LittleEndian, &rootNode.data)
-	// binary.Read(file, binary.LittleEndian, &rootNode.childs)
-
-	// _, err = file.Read(fmt.Sprintln(data))
-	// if err != nil {
-	// 	fmt.Println("Couldn't open storage file!")
-	// }
-
-	fmt.Println(data1)
+	var serializedData serializedNode
+	error := json.Unmarshal(data, &serializedData)
+	if error != nil {
+		fmt.Println("error:", error)
+	}
+	fmt.Println(serializedData)
 }
 
 func serializeStorage() []serializedNode {
@@ -375,19 +353,19 @@ func serializeTree(currentNode *node, parentKey string) []serializedNode {
 	fmt.Println("parentKey: " + parentKey)
 
 	var currentSerializedNode = serializedNode{
-		parentKey: parentKey,
-		key:       currentNode.key,
-		name:      currentNode.name,
-		data:      currentNode.data}
+		ParentKey: parentKey,
+		Key:       currentNode.key,
+		Name:      currentNode.name,
+		Data:      currentNode.data}
 	serializedData = append(serializedData, currentSerializedNode)
 
 	if currentNode.childs != nil {
 		for _, childNode := range currentNode.childs {
 			currentSerializedNode := serializedNode{
-				parentKey: currentNode.key,
-				key:       childNode.key,
-				name:      childNode.name,
-				data:      childNode.data}
+				ParentKey: currentNode.key,
+				Key:       childNode.key,
+				Name:      childNode.name,
+				Data:      childNode.data}
 			serializedData = append(serializedData, currentSerializedNode)
 			if childNode.childs != nil {
 				serializedData = append(serializedData, serializeTree(childNode.childs[0], childNode.key)...)
@@ -408,38 +386,21 @@ func unserializeStorage(serializedData []serializedNode) node {
 
 	for _, serializedNode := range serializedData {
 
-		if serializedNode.parentKey == "" {
-			nodes[serializedNode.key] = node{key: serializedNode.key, name: serializedNode.name, data: serializedNode.data}
+		if serializedNode.ParentKey == "" {
+			nodes[serializedNode.Key] = node{key: serializedNode.Key, name: serializedNode.Name, data: serializedNode.Data}
 			//parentKey = serializedNode.key
 		} else {
-			newNode := node{key: serializedNode.key, name: serializedNode.name, data: serializedNode.data}
-			parentNode := nodes[serializedNode.parentKey]
-			fmt.Println("parentKey: " + serializedNode.parentKey)
+			newNode := node{key: serializedNode.Key, name: serializedNode.Name, data: serializedNode.Data}
+			parentNode := nodes[serializedNode.ParentKey]
+			fmt.Println("parentKey: " + serializedNode.ParentKey)
 			parentNode.childs = append(parentNode.childs, &newNode)
-			nodes[serializedNode.parentKey] = parentNode
-			nodes[serializedNode.key] = newNode
+			nodes[serializedNode.ParentKey] = parentNode
+			nodes[serializedNode.Key] = newNode
 
 			fmt.Println("parentKey childs: ")
-			fmt.Println(nodes[serializedNode.parentKey].childs)
+			fmt.Println(nodes[serializedNode.ParentKey].childs)
 			//parentKey = serializedNode.key
 		}
-
-		// if serializedNode.parentKey == "" {
-		// 	//rootNode = node{key: serializedNode.key, name: serializedNode.name, data: serializedNode.data}
-		// 	currentNode = node{key: serializedNode.key, name: serializedNode.name, data: serializedNode.data}
-		// 	parentKey = serializedNode.key
-		// } else {
-
-		// 	newNode := node{key: serializedNode.key, name: serializedNode.name, data: serializedNode.data}
-		// 	if serializedNode.parentKey == parentKey {
-		// 		currentNode.childs = append(currentNode.childs, &newNode)
-		// 		lastNode = &newNode
-		// 	} else {
-		// 		lastNode.childs = append(lastNode.childs, &newNode)
-		// 		parentKey = serializedNode.key
-		// 	}
-
-		// }
 	}
 
 	fmt.Println("nodes: ")
